@@ -1,0 +1,25 @@
+#!/usr/bin/with-contenv bash
+
+# Create config files if they don't exist
+if [ ! -f /config/config-node.toml ]; then
+  nano_node --generate_config node > /config/config-node.toml
+fi
+if [ ! -f /config/config-rpc.toml ]; then
+  nano_node --generate_config rpc > /config/config-rpc.toml
+fi
+
+# Bootstrap database from URL if it does not exist
+if [ ! -f /config/data.ldb ] && [ -n "${LMDB_BOOTSTRAP_URL}" ]; then
+  curl -o \
+  /config/lmdb.7z -L \
+  "${LMDB_BOOTSTRAP_URL}"
+  cd /config
+  7z x lmdb.7z
+  rm -f lmdb.7z
+  chown abc:abc data.ldb
+fi
+
+# ownership
+chown abc:abc \
+  /config/config-node.toml \
+  /config/config-rpc.toml 
